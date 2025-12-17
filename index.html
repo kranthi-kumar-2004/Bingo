@@ -1,62 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Bingo Caller</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bingo Caller (1–90)</title>
+
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 40px;
+      padding: 20px;
+      background: #f5f5f5;
     }
+
+    h1 {
+      font-size: 26px;
+    }
+
     #current {
-      font-size: 40px;
-      margin: 20px;
-      color: green;
+      font-size: 70px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin: 20px 0;
     }
+
+    button {
+      padding: 14px 22px;
+      font-size: 18px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      background: #1976d2;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    #reset {
+      background: #d32f2f;
+    }
+
     #previous {
       margin-top: 20px;
-      font-size: 18px;
+      font-size: 16px;
+      word-wrap: break-word;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      #current {
+        font-size: 50px;
+      }
+      button {
+        width: 100%;
+      }
     }
   </style>
 </head>
+
 <body>
 
-  <h1>Bingo Caller (1–90)</h1>
-
-  <button onclick="callNumber()">Call Number</button>
+  <h1>🎱 Bingo Caller (1 – 90)</h1>
 
   <div id="current">---</div>
 
+  <button onclick="callNumber()">Call Next Number</button>
+  <button id="reset" onclick="resetGame()">Reset Game</button>
+
   <div id="previous">
     <strong>Previous Numbers:</strong>
-    <p id="prevList"></p>
+    <p id="prevList">None</p>
   </div>
 
   <script>
-    let numbers = [];
-    let index = 0;
-    let calledNumbers = [];
+    let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
+    let index = JSON.parse(localStorage.getItem("index")) || 0;
+    let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
 
-    // Prepare numbers 1 to 90 and shuffle
-    for (let i = 1; i <= 90; i++) {
-      numbers.push(i);
+    // Initialize if first time
+    if (numbers.length === 0) {
+      for (let i = 1; i <= 90; i++) {
+        numbers.push(i);
+      }
+      numbers.sort(() => Math.random() - 0.5);
+      saveData();
     }
 
-    numbers.sort(() => Math.random() - 0.5);
+    // Restore UI after reload
+    if (calledNumbers.length > 0) {
+      document.getElementById("current").innerText =
+        calledNumbers[calledNumbers.length - 1];
+      document.getElementById("prevList").innerText =
+        calledNumbers.join(", ");
+    }
+
+    function saveData() {
+      localStorage.setItem("numbers", JSON.stringify(numbers));
+      localStorage.setItem("index", JSON.stringify(index));
+      localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
+    }
 
     function callNumber() {
       if (index >= numbers.length) {
-        alert("All numbers are called!");
+        alert("🎉 All numbers have been called!");
         return;
       }
 
       let currentNumber = numbers[index];
       index++;
-
       calledNumbers.push(currentNumber);
 
       document.getElementById("current").innerText = currentNumber;
-      document.getElementById("prevList").innerText = calledNumbers.join(", ");
+      document.getElementById("prevList").innerText =
+        calledNumbers.join(", ");
+
+      saveData();
+    }
+
+    function resetGame() {
+      if (confirm("Reset the game?")) {
+        localStorage.clear();
+        location.reload();
+      }
     }
   </script>
 
