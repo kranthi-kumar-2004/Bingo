@@ -29,7 +29,7 @@
     button {
       padding: 14px 22px;
       font-size: 18px;
-      margin: 8px 0;
+      margin: 10px 0;
       border: none;
       border-radius: 8px;
       color: white;
@@ -37,15 +37,15 @@
       width: 100%;
     }
 
+    button:active {
+      transform: scale(0.95);
+    }
+
     #call {
       background: #1976d2;
     }
 
-    #removeAll {
-      background: #f57c00;
-    }
-
-    /* 🔴 Small reset button top-right */
+    /* Small reset button (top-right) */
     #reset {
       background: #d32f2f;
       padding: 6px 12px;
@@ -76,7 +76,7 @@
 
 <body>
 
-  <!-- Small Reset Button -->
+  <!-- Reset Button -->
   <button id="reset" onclick="resetGame()">Reset</button>
 
   <h1>🎱 Bingo Caller (1 – 90)</h1>
@@ -84,7 +84,6 @@
   <div id="current">---</div>
 
   <button id="call" onclick="callNumber()">Call Next Number</button>
-  <button id="removeAll" onclick="removeAll()">Remove All Previous</button>
 
   <div id="previous">
     <strong>Previous Numbers:</strong>
@@ -93,10 +92,10 @@
 
   <script>
     let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
-    let index = JSON.parse(localStorage.getItem("index")) || 0;
+    let index = Number(localStorage.getItem("index")) || 0;
     let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
 
-    // Initialize
+    // Initialize once
     if (numbers.length === 0) {
       for (let i = 1; i <= 90; i++) numbers.push(i);
       numbers.sort(() => Math.random() - 0.5);
@@ -119,9 +118,10 @@
 
     function callNumber() {
       if (index >= numbers.length) {
-        alert("All numbers called!");
+        alert("🎉 All numbers have been called!");
         return;
       }
+
       const num = numbers[index++];
       calledNumbers.push(num);
 
@@ -132,225 +132,8 @@
       saveData();
     }
 
-    function removeAll() {
-      if (confirm("Clear previous numbers?")) {
-        calledNumbers = [];
-        localStorage.removeItem("calledNumbers");
-        document.getElementById("prevList").innerText = "None";
-      }
-    }
-
     function resetGame() {
       if (confirm("Reset entire game?")) {
-        localStorage.clear();
-        location.reload();
-      }
-    }
-  </script>
-
-</body>
-</html>
-    button:active {
-      transform: scale(0.95);
-    }
-
-    #reset {
-      background: #d32f2f;
-    }
-
-    #removeAll {
-      background: #f57c00;
-    }
-
-    #previous {
-      margin-top: 20px;
-      font-size: 16px;
-      word-wrap: break-word;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    @media (max-width: 600px) {
-      #current {
-        font-size: 50px;
-      }
-      button {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <h1>🎱 Bingo Caller (1 – 90)</h1>
-
-  <div id="current">---</div>
-
-  <button onclick="callNumber()">Call Next Number</button>
-  <button id="removeAll" onclick="removeAll()">Remove All Previous</button>
-  <button id="reset" onclick="resetGame()">Reset Game</button>
-
-  <div id="previous">
-    <strong>Previous Numbers:</strong>
-    <p id="prevList">None</p>
-  </div>
-
-  <script>
-    let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
-    let index = JSON.parse(localStorage.getItem("index")) || 0;
-    let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
-
-    // Initialize game
-    if (numbers.length === 0) {
-      for (let i = 1; i <= 90; i++) {
-        numbers.push(i);
-      }
-      numbers.sort(() => Math.random() - 0.5);
-      saveData();
-    }
-
-    // Restore UI
-    if (calledNumbers.length > 0) {
-      document.getElementById("current").innerText =
-        calledNumbers[calledNumbers.length - 1];
-      document.getElementById("prevList").innerText =
-        calledNumbers.join(", ");
-    }
-
-    function saveData() {
-      localStorage.setItem("numbers", JSON.stringify(numbers));
-      localStorage.setItem("index", JSON.stringify(index));
-      localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
-    }
-
-    function callNumber() {
-      if (index >= numbers.length) {
-        alert("🎉 All numbers have been called!");
-        return;
-      }
-
-      let currentNumber = numbers[index];
-      index++;
-      calledNumbers.push(currentNumber);
-
-      document.getElementById("current").innerText = currentNumber;
-      document.getElementById("prevList").innerText =
-        calledNumbers.join(", ");
-
-      saveData();
-    }
-
-    // 🔥 Remove only previous numbers (keep game running)
-    function removeAll() {
-      if (confirm("Remove all previous numbers?")) {
-        calledNumbers = [];
-        localStorage.removeItem("calledNumbers");
-        document.getElementById("prevList").innerText = "None";
-      }
-    }
-
-    // 🔁 Full reset
-    function resetGame() {
-      if (confirm("Reset the entire game?")) {
-        localStorage.clear();
-        location.reload();
-      }
-    }
-  </script>
-
-</body>
-</html>
-    button:active {
-      transform: scale(0.95);
-    }
-
-    #reset {
-      background: #d32f2f;
-    }
-
-    #previous {
-      margin-top: 20px;
-      font-size: 16px;
-      word-wrap: break-word;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    @media (max-width: 600px) {
-      #current {
-        font-size: 50px;
-      }
-      button {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <h1>🎱 Bingo Caller (1 – 90)</h1>
-
-  <div id="current">---</div>
-
-  <button onclick="callNumber()">Call Next Number</button>
-  <button id="reset" onclick="resetGame()">Reset Game</button>
-
-  <div id="previous">
-    <strong>Previous Numbers:</strong>
-    <p id="prevList">None</p>
-  </div>
-
-  <script>
-    let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
-    let index = JSON.parse(localStorage.getItem("index")) || 0;
-    let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
-
-    // Initialize if first time
-    if (numbers.length === 0) {
-      for (let i = 1; i <= 90; i++) {
-        numbers.push(i);
-      }
-      numbers.sort(() => Math.random() - 0.5);
-      saveData();
-    }
-
-    // Restore UI after reload
-    if (calledNumbers.length > 0) {
-      document.getElementById("current").innerText =
-        calledNumbers[calledNumbers.length - 1];
-      document.getElementById("prevList").innerText =
-        calledNumbers.join(", ");
-    }
-
-    function saveData() {
-      localStorage.setItem("numbers", JSON.stringify(numbers));
-      localStorage.setItem("index", JSON.stringify(index));
-      localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
-    }
-
-    function callNumber() {
-      if (index >= numbers.length) {
-        alert("🎉 All numbers have been called!");
-        return;
-      }
-
-      let currentNumber = numbers[index];
-      index++;
-      calledNumbers.push(currentNumber);
-
-      document.getElementById("current").innerText = currentNumber;
-      document.getElementById("prevList").innerText =
-        calledNumbers.join(", ");
-
-      saveData();
-    }
-
-    function resetGame() {
-      if (confirm("Reset the game?")) {
         localStorage.clear();
         location.reload();
       }
