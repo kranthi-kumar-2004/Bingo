@@ -94,8 +94,9 @@
     let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
     let index = Number(localStorage.getItem("index")) || 0;
     let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
+    let intervalId = null;
 
-    // Initialize once
+    // Initialize numbers once
     if (numbers.length === 0) {
       for (let i = 1; i <= 90; i++) numbers.push(i);
       numbers.sort(() => Math.random() - 0.5);
@@ -118,6 +119,7 @@
 
     function callNumber() {
       if (index >= numbers.length) {
+        stopAuto();
         alert("🎉 All numbers have been called!");
         return;
       }
@@ -132,12 +134,27 @@
       saveData();
     }
 
+    // Auto-generate every 3 seconds
+    function startAuto() {
+      if (intervalId) return;
+      intervalId = setInterval(callNumber, 3000);
+    }
+
+    function stopAuto() {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+
     function resetGame() {
       if (confirm("Reset entire game?")) {
+        stopAuto();
         localStorage.clear();
         location.reload();
       }
     }
+
+    // Start automatically on page load
+    startAuto();
   </script>
 
 </body>
