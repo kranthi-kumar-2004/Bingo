@@ -43,9 +43,9 @@
 
     #call { background: #1976d2; }
     #start { background: #388e3c; }
-    #stop { background: #f57c00; }
+    #stop  { background: #f57c00; }
 
-    /* Reset top-right */
+    /* Small reset button (top-right) */
     #reset {
       background: #d32f2f;
       padding: 6px 12px;
@@ -67,13 +67,16 @@
     }
 
     @media (max-width: 600px) {
-      #current { font-size: 50px; }
+      #current {
+        font-size: 50px;
+      }
     }
   </style>
 </head>
 
 <body>
 
+  <!-- Reset -->
   <button id="reset" onclick="resetGame()">Reset</button>
 
   <h1>🎱 Bingo Caller (1 – 90)</h1>
@@ -91,7 +94,9 @@
     let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
     let index = Number(localStorage.getItem("index")) || 0;
     let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
+
     let intervalId = null;
+    let timeoutId = null;
 
     // Initialize numbers
     if (numbers.length === 0) {
@@ -131,13 +136,22 @@
       saveData();
     }
 
+    // ▶ Start after 3s, then every 3s
     function startAuto() {
-      if (intervalId) return; // prevent double start
-      intervalId = setInterval(callNumber, 3000);
+      if (intervalId || timeoutId) return;
+
+      timeoutId = setTimeout(() => {
+        callNumber();
+        intervalId = setInterval(callNumber, 3000);
+        timeoutId = null;
+      }, 3000);
     }
 
+    // ⏹ Stop immediately
     function stopAuto() {
+      clearTimeout(timeoutId);
       clearInterval(intervalId);
+      timeoutId = null;
       intervalId = null;
     }
 
