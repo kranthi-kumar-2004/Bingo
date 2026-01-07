@@ -1,168 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bingo Caller (1–90)</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bingo Caller (1–90)</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #f5f5f5;
-      position: relative;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 10px;
+}
 
-    h1 {
-      font-size: 26px;
-      margin-top: 40px;
-    }
+#reset {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    #current {
-      font-size: 70px;
-      font-weight: bold;
-      color: #2e7d32;
-      margin: 20px 0;
-    }
+.container {
+  display: flex;
+  gap: 15px;
+  margin-top: 50px;
+}
 
-    button {
-      padding: 14px 22px;
-      font-size: 18px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      width: 100%;
-    }
+.left {
+  flex: 1;
+  text-align: center;
+}
 
-    button:active {
-      transform: scale(0.95);
-    }
+h1 {
+  margin-bottom: 20px;
+}
+#current {
+  font-size: 140px;         
+  font-weight: bold;
+  color: #2e7d32;
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 25px;
+  line-height: 1;
+}
 
-    #call { background: #1976d2; }
-    #start { background: #388e3c; }
-    #stop  { background: #f57c00; }
 
-    /* Small reset button (top-right) */
-    #reset {
-      background: #d32f2f;
-      padding: 6px 12px;
-      font-size: 14px;
-      width: auto;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      border-radius: 6px;
-    }
+button.main {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
 
-    #previous {
-      margin-top: 20px;
-      font-size: 16px;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      word-wrap: break-word;
-    }
+#start { background: #388e3c; }
+#stop  { background: #f57c00; }
 
-    @media (max-width: 600px) {
-      #current {
-        font-size: 50px;
-      }
-    }
-  </style>
+.right {
+  flex: 1.2;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+}
+
+.number-box {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.called {
+  background: orange;
+  color: white;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  #current {
+    font-size: 90px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- Reset -->
-  <button id="reset" onclick="resetGame()">Reset</button>
+<button id="reset" onclick="resetGame()">Reset</button>
 
-  <h1>🎱 Bingo Caller (1 – 90)</h1>
+<div class="container">
 
-  <div id="current">---</div>
-  <button id="start" onclick="startAuto()">Start</button>
-  <button id="stop" onclick="stopAuto()">Stop</button>
-
-  <div id="previous">
-    <strong>Previous Numbers:</strong>
-    <p id="prevList">None</p>
+  <div class="left">
+    <h1>🎱 Bingo Caller</h1>
+    <div id="current">---</div>
+    <button class="main" id="start" onclick="startAuto()">Start</button>
+    <button class="main" id="stop" onclick="stopAuto()">Stop</button>
   </div>
 
-  <script>
-    let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
-    let index = Number(localStorage.getItem("index")) || 0;
-    let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
+  <div class="right" id="board"></div>
 
-    let intervalId = null;
-    let timeoutId = null;
+</div>
 
-    // Initialize numbers
-    if (numbers.length === 0) {
-      for (let i = 1; i <= 90; i++) numbers.push(i);
-      numbers.sort(() => Math.random() - 0.5);
-      saveData();
-    }
+<script>
+let numbers = JSON.parse(localStorage.getItem("numbers")) || [];
+let index = Number(localStorage.getItem("index")) || 0;
+let calledNumbers = JSON.parse(localStorage.getItem("calledNumbers")) || [];
 
-    // Restore UI
-    if (calledNumbers.length > 0) {
-      document.getElementById("current").innerText =
-        calledNumbers[calledNumbers.length - 1];
-      document.getElementById("prevList").innerText =
-        calledNumbers.join(", ");
-    }
+let intervalId = null;
+let timeoutId = null;
 
-    function saveData() {
-      localStorage.setItem("numbers", JSON.stringify(numbers));
-      localStorage.setItem("index", index);
-      localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
-    }
+/* Initialize numbers */
+if (numbers.length === 0) {
+  for (let i = 1; i <= 90; i++) numbers.push(i);
+  numbers.sort(() => Math.random() - 0.5);
+  saveData();
+}
 
-    function callNumber() {
-      if (index >= numbers.length) {
-        stopAuto();
-        alert("🎉 All numbers have been called!");
-        return;
-      }
+/* Create board */
+const board = document.getElementById("board");
+for (let i = 1; i <= 90; i++) {
+  const div = document.createElement("div");
+  div.className = "number-box";
+  div.id = "num-" + i;
+  div.innerText = i;
+  board.appendChild(div);
+}
 
-      const num = numbers[index++];
-      calledNumbers.push(num);
+/* Restore UI */
+if (calledNumbers.length > 0) {
+  document.getElementById("current").innerText =
+    calledNumbers[calledNumbers.length - 1];
 
-      document.getElementById("current").innerText = num;
-      document.getElementById("prevList").innerText =
-        calledNumbers.join(", ");
+  calledNumbers.forEach(n => {
+    document.getElementById("num-" + n).classList.add("called");
+  });
+}
 
-      saveData();
-    }
+/* 🔊 Voice function */
+function speakNumber(num) {
+  const msg = new SpeechSynthesisUtterance(num);
+  msg.rate = 0.85;
+  msg.pitch = 1.1;
+  msg.volume = 1;
+  speechSynthesis.cancel(); // stop previous voice
+  speechSynthesis.speak(msg);
+}
 
-    // ▶ Start after 3s, then every 3s
-    function startAuto() {
-      if (intervalId || timeoutId) return;
+function saveData() {
+  localStorage.setItem("numbers", JSON.stringify(numbers));
+  localStorage.setItem("index", index);
+  localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
+}
 
-      timeoutId = setTimeout(() => {
-        callNumber();
-        intervalId = setInterval(callNumber, 3000);
-        timeoutId = null;
-      }, 3000);
-    }
+function callNumber() {
+  if (index >= numbers.length) {
+    stopAuto();
+    alert("🎉 All numbers have been called!");
+    return;
+  }
 
-    // ⏹ Stop immediately
-    function stopAuto() {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-      timeoutId = null;
-      intervalId = null;
-    }
+  const num = numbers[index++];
+  calledNumbers.push(num);
 
-    function resetGame() {
-      if (confirm("Reset entire game?")) {
-        stopAuto();
-        localStorage.clear();
-        location.reload();
-      }
-    }
-  </script>
+  document.getElementById("current").innerText = num;
+  document.getElementById("num-" + num).classList.add("called");
+
+  speakNumber(num); // 🔊 announce
+
+  saveData();
+}
+
+function startAuto() {
+  if (intervalId || timeoutId) return;
+
+  timeoutId = setTimeout(() => {
+    callNumber();
+    intervalId = setInterval(callNumber, 3000);
+    timeoutId = null;
+  }, 3000);
+}
+
+function stopAuto() {
+  clearTimeout(timeoutId);
+  clearInterval(intervalId);
+  timeoutId = null;
+  intervalId = null;
+}
+
+function resetGame() {
+  if (confirm("Reset entire game?")) {
+    stopAuto();
+    localStorage.clear();
+    location.reload();
+  }
+}
+</script>
 
 </body>
 </html>
